@@ -19,6 +19,8 @@ return {
               information = { 'undercurl' },
             },
           },
+          noice = true,
+          notify = true,
           treesitter_context = true,
           lsp_trouble = true,
           which_key = true,
