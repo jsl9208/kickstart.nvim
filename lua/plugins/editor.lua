@@ -1,3 +1,5 @@
+local Util = require 'util'
+
 -- Telescope live_grep in git root
 -- Function to find the git root directory based on the current buffer's path
 local function find_git_root()
@@ -65,18 +67,111 @@ local function telescope(builtin, opts)
 end
 
 return {
-  -- File Explorer
+  -- file explorer
   {
-    'stevearc/oil.nvim',
-    lazy = false,
-    opts = {
-      delete_to_trash = true,
-    },
-    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    'nvim-neo-tree/neo-tree.nvim',
+    branch = 'v3.x',
+    cmd = 'Neotree',
     keys = {
-      { '-', '<CMD>Oil<CR>', desc = 'Open parent directory' },
+      {
+        '<leader>fe',
+        function()
+          require('neo-tree.command').execute { toggle = true, dir = Util.root() }
+        end,
+        desc = 'Explorer NeoTree (root dir)',
+      },
+      {
+        '<leader>fE',
+        function()
+          require('neo-tree.command').execute { toggle = true, dir = vim.loop.cwd() }
+        end,
+        desc = 'Explorer NeoTree (cwd)',
+      },
+      { '<leader>e', '<leader>fe', desc = 'Explorer NeoTree (root dir)', remap = true },
+      { '<leader>E', '<leader>fE', desc = 'Explorer NeoTree (cwd)', remap = true },
+      {
+        '<leader>ge',
+        function()
+          require('neo-tree.command').execute { source = 'git_status', toggle = true }
+        end,
+        desc = 'Git explorer',
+      },
+      {
+        '<leader>be',
+        function()
+          require('neo-tree.command').execute { source = 'buffers', toggle = true }
+        end,
+        desc = 'Buffer explorer',
+      },
     },
+    deactivate = function()
+      vim.cmd [[Neotree close]]
+    end,
+    init = function()
+      if vim.fn.argc(-1) == 1 then
+        local stat = vim.loop.fs_stat(vim.fn.argv(0))
+        if stat and stat.type == 'directory' then
+          require 'neo-tree'
+        end
+      end
+    end,
+    opts = {
+      sources = { 'filesystem', 'buffers', 'git_status', 'document_symbols' },
+      open_files_do_not_replace_types = { 'terminal', 'Trouble', 'trouble', 'qf', 'Outline' },
+      filesystem = {
+        bind_to_cwd = false,
+        follow_current_file = { enabled = true },
+        use_libuv_file_watcher = true,
+      },
+      window = {
+        mappings = {
+          ['<space>'] = 'none',
+        },
+      },
+      default_component_configs = {
+        indent = {
+          with_expanders = true, -- if nil and file nesting is enabled, will enable expanders
+          expander_collapsed = '',
+          expander_expanded = '',
+          expander_highlight = 'NeoTreeExpander',
+        },
+      },
+    },
+    config = function(_, opts)
+      local function on_move(data)
+        Util.lsp.on_rename(data.source, data.destination)
+      end
+
+      local events = require 'neo-tree.events'
+      opts.event_handlers = opts.event_handlers or {}
+      vim.list_extend(opts.event_handlers, {
+        { event = events.FILE_MOVED, handler = on_move },
+        { event = events.FILE_RENAMED, handler = on_move },
+      })
+      require('neo-tree').setup(opts)
+      vim.api.nvim_create_autocmd('TermClose', {
+        pattern = '*lazygit',
+        callback = function()
+          if package.loaded['neo-tree.sources.git_status'] then
+            require('neo-tree.sources.git_status').refresh()
+          end
+        end,
+      })
+    end,
   },
+
+  -- File Explorer
+  -- {
+  --   'stevearc/oil.nvim',
+  --   lazy = false,
+  --   opts = {
+  --     delete_to_trash = true,
+  --   },
+  --   dependencies = { 'nvim-tree/nvim-web-devicons' },
+  --   keys = {
+  --     { '-', '<CMD>Oil<CR>', desc = 'Open parent directory' },
+  --   },
+  -- },
 
   -- search/replace in multiple files
   {
@@ -451,6 +546,43 @@ return {
       { "<leader>xT", "<cmd>TodoTrouble keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme (Trouble)" },
       { "<leader>st", "<cmd>TodoTelescope<cr>", desc = "Todo" },
       { "<leader>sT", "<cmd>TodoTelescope keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme" },
+    },
+
+    -- Folding
+    {
+      'kevinhwang91/nvim-ufo',
+      dependencies = { 'kevinhwang91/promise-async' },
+      event = 'LazyFile',
+      init = function()
+        vim.opt.foldcolumn = '1' -- '0' is not bad
+        vim.opt.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+        vim.opt.foldlevelstart = 99
+        vim.opt.foldenable = true
+      end,
+      keys = {
+        {
+          'zR',
+          function()
+            require('ufo').openAllFolds()
+          end,
+        },
+        {
+          'zM',
+          function()
+            require('ufo').closeAllFolds()
+          end,
+        },
+        {
+          '<tab>',
+          'za',
+          'Toggle fold under cursor',
+        },
+      },
+      opts = {
+        provider_selector = function()
+          return { 'treesitter', 'indent' }
+        end,
+      },
     },
   },
 }

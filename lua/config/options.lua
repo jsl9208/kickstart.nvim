@@ -63,12 +63,12 @@ end
 
 -- Folding
 vim.opt.foldlevel = 99
--- vim.opt.foldtext = "v:lua.require'lazyvim.util'.ui.foldtext()"
+vim.opt.foldtext = "v:lua.require'util'.ui.foldtext()"
 vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-vim.opt.foldtext = 'v:lua.vim.treesitter.foldtext()'
+-- vim.opt.foldtext = 'v:lua.vim.treesitter.foldtext()'
 
 -- if vim.fn.has 'nvim-0.9.0' == 1 then
---   vim.opt.statuscolumn = [[%!v:lua.require'lazyvim.util'.ui.statuscolumn()]]
+--   vim.opt.statuscolumn = [[%!v:lua.require'util'.ui.statuscolumn()]]
 -- end
 --
 -- -- HACK: causes freezes on <= 0.9, so only enable on >= 0.10 for now

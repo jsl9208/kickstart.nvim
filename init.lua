@@ -29,7 +29,11 @@ require('util.root').setup()
 --  You can also configure plugins after the setup call,
 --    as they will be available in your neovim runtime.
 require('lazy').setup {
-  spec = { { import = 'plugins' }, { import = 'plugins.extras.coding' } },
+  spec = {
+    { import = 'plugins' },
+    { import = 'plugins.extras.coding.copilot' },
+    { import = 'plugins.extras.lang.typescript' },
+  },
   defaults = {
     -- By default, only LazyVim plugins will be lazy-loaded. Your custom plugins will load during startup.
     -- If you know what you're doing, you can set this to `true` to have all your custom plugins lazy-loaded by default.
