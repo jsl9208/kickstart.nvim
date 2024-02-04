@@ -19,6 +19,11 @@ setmetatable(M, {
   end,
 })
 
+---@param plugin string
+function M.has(plugin)
+  return require('lazy.core.config').spec.plugins[plugin] ~= nil
+end
+
 ---@param name string
 function M.opts(name)
   local plugin = require('lazy.core.config').plugins[name]
