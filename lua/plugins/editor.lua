@@ -573,7 +573,7 @@ return {
           end,
         },
         {
-          '<tab>',
+          '<s-tab>',
           'za',
           'Toggle fold under cursor',
         },

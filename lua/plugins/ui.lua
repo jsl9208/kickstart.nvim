@@ -2,6 +2,7 @@ local Lualine = require 'util.lualine'
 local Ui = require 'util.ui'
 
 return {
+  { 'norcalli/nvim-colorizer.lua', opts = {} },
   -- Better `vim.notify()`
   {
     'rcarriga/nvim-notify',
