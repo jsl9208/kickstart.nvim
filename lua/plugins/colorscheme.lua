@@ -1,5 +1,14 @@
 return {
   {
+    'folke/tokyonight.nvim',
+    lazy = false,
+    priority = 1000,
+    opts = {
+      style = 'moon',
+      transparent = true,
+    },
+  },
+  {
     'catppuccin/nvim',
     as = 'catppuccin',
     lazy = false,
@@ -27,8 +36,7 @@ return {
           which_key = true,
         },
       }
-
-      vim.cmd.colorscheme 'catppuccin'
+      -- vim.cmd.colorscheme 'catppuccin'
     end,
   },
 
